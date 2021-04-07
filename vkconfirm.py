@@ -1,38 +1,29 @@
 
 
-import vk_api, time
-vk = vk_api.VkApi(token="access_token") # получаем в https://vkhost.github.io/ [VK API]
-print("Включен автоприем в друзья")
+import sys, vk_api, time
+print("\nAutoFriendAdd (Stable v2.0) by Sykten13 - vk.com/glideru")
+access_token = input("(https://vkhost.github.io) - [VK API]\nВведите ваш access token : ")
+vk = vk_api.VkApi(token=access_token)
+print("\nЗаявок в друзья: " + str(vk.method("users.getFollowers", {"count": 1})["count"])+"\n")
 id2 = 0
-followers_count = vk.method("users.getFollowers", {"count": 0})["count"] #получаем количество подписчиков
-if followers_count > 0:
-    if followers_count == 1:
-        print("Добавляю в друзья "+str(followers_count)+ " пользователя")
-    if followers_count > 1:
-        print("Добавляю в друзья "+str(followers_count)+ " пользователей")
-if followers_count > 1000:
-    followers_count == 1000
 while True:
-    followers_count = vk.method("users.getFollowers", {"count": 0})["count"] #получаем количество подписчиков
-    if followers_count >= 1:
-        print("Новая заявка в друзья")
-    followers = vk.method("users.getFollowers", {"count": 10}) #получаем id подписчиков
-    for i in range(followers_count):
-        try:
-            id = followers["items"][0] #получаем id подписчика
-            if id != id2 or id2 == 0:
-                id2 = id
-                print("id пользователя " + str(id))
-                user_get = vk.method("users.get", {"user_ids": id}) #получаем инфу про подписчика
+    followers_count = vk.method("users.getFollowers", {"count": 1})["count"]
+    if followers_count > 0:
+        id = vk.method("users.getFollowers", {"count": 1})["items"][0]
+        if id != id2 or id2 == 0:
+            id2 = id
+            print("Новая заявка в друзья, id пользователя " + str(id))
+            try:
+                vk.method("friends.add", {"user_id": id})
+                print("Добавил пользователя c id " + str(id) + " в друзья\n")
+            except:
                 try:
-                    vk.method("friends.add", {"user_id": id})
-                    print("Добавил пользователя c id " + str(id) + " в друзья")
+                    vk.method("account.ban", {"owner_id": id})
+                    print("Пользователь с id " + str(id) + " добавлен в чёрный список\n")
                 except:
-                    try:
-                        vk.method("account.ban", {"owner_id": id})
-                        print("Пользователь с id " + str(id) + " добавлен в чёрный список")
-                    except:
-                        print("Пользователь уже добавлен в чёрном списке")
-        except:
-            continue
+                    print("Пользователь уже добавлен в чёрном списке\n")
+    else:
+        for i in range(4):
+            sys.stdout.write("Ждём заявки в друзья" + "." * i + "\r")
+            time.sleep(0.8)
 
